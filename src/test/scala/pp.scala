@@ -15,6 +15,10 @@ class PPSpec extends FunSpec with Matchers {
         PP.format("foo") shouldEqual "\"foo\""
         PP.format("\"") shouldEqual "\"\\\"\""
       }
+      it("should format other objects with toString()") {
+        val obj = new AnyRef()
+        PP.format(obj) shouldEqual obj.toString
+      }
     }
   }
 }
