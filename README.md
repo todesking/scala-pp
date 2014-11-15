@@ -13,11 +13,7 @@ addSbtPlugin("com.todesking" %% "scala-pp" % "0.0.1")
 ## Usage
 
 ```scala
-// Add pp() and tapp() method to any objects
-import com.todesking.pp.ForAny._
-
-// All-in-one
-import com.todesking.pp._
+import com.todesking.scalapp._
 
 pp(1)
 1
