@@ -1,6 +1,4 @@
-package com.todesking
-
-package scalapp
+package com.todesking.scalapp
 
 object ScalaPP {
   def format(value: Any): String = {

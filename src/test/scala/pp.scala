@@ -11,7 +11,7 @@ object CaseClassesForTest {
 }
 
 class PPSpec extends FunSpec with Matchers {
-  describe("PP") {
+  describe("ScalaPP") {
     describe("#format()") {
       it("should format literals") {
         ScalaPP.format(1) shouldEqual "1"
@@ -62,6 +62,21 @@ class PPSpec extends FunSpec with Matchers {
             |)""".stripMargin.trim
         }
       }
+    }
+  }
+  describe("Any#pp") {
+    def nullPrint(s: String): Unit = ()
+    it("should return this") {
+      1.pp(nullPrint) shouldEqual 1
+    }
+    it("should print formatted representation of this") {
+      var out: String = null
+      "123".pp(out = _)
+      out shouldEqual "\"123\""
+    }
+    it("should print to stdout when no parameter given") {
+      // FIXME: HOW to test that???
+      123.pp()
     }
   }
 }
