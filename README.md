@@ -2,6 +2,10 @@
 
 It's like the Ruby's `pp`
 
+## Requirements
+
+Scala 2.11.x (Unfortunately, 2.10.x is not supported yet)
+
 ## Install
 
 ```scala
