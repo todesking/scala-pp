@@ -1,6 +1,8 @@
-package com.todesking.scalapp
+package com.todesking
 
-object PP {
+package scalapp
+
+object ScalaPP {
   def format(value: Any): String = {
     val formatter = new Layout(80, 0)
     format(value, formatter)
