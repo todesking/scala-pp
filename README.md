@@ -24,10 +24,30 @@ scala> "foo".pp()
 "foo"
 res1: String = foo
 
+
 trait Tree
 case class Node(l: Tree, r: Tree) extends Tree
 case class Leaf(value: Any) extends Tree
 
+scala> Node(Leaf(1),Node(Node(Leaf(1),Node(Leaf(1),Leaf(2))),Leaf(9))).pp()
+Node(
+  Leaf(1),
+  Node(
+    Node(
+      Leaf(1),
+      Node(
+        Leaf(1),
+        Leaf(2)
+      )
+    ),
+    Leaf(9)
+  )
+)
+res4: Node = Node(Leaf(1),Node(Node(Leaf(1),Node(Leaf(1),Leaf(2))),Leaf(9)))
+
+// Format style could change via implicit variable
+// NOTE: Make sure implicit val name to `defaultscalapp` to avoid conflict
+scala> implicit val defaultScalaPP = new ScalaPP(showMemberName = true)
 scala> Node(Leaf(1),Node(Node(Leaf(1),Node(Leaf(1),Leaf(2))),Leaf(9))).pp()
 Node(
   l = Leaf(value = 1),
@@ -42,5 +62,4 @@ Node(
     r = Leaf(value = 9)
   )
 )
-res4: Node = Node(Leaf(1),Node(Node(Leaf(1),Node(Leaf(1),Leaf(2))),Leaf(9)))
 ```
