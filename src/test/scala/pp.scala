@@ -44,11 +44,24 @@ class PPSpec extends FunSpec with Matchers {
         }
 
         it("should format to pretty style") {
+          ScalaPP.format(Cons(Cons(Atom(1), Atom(2)), Atom(3))) shouldEqual """
+          |Cons(
+          |  car = Cons(
+          |    car = Atom(value = 1),
+          |    cdr = Atom(value = 2)
+          |  ),
+          |  cdr = Atom(value = 3)
+          |)
+          """.stripMargin.trim
+
           ScalaPP.format(
-            Cons(Atom(1), Cons(Atom(2), Cons(Atom(3), Cons(Atom(4), SNil))))
+            Cons(Cons(Atom(1), Atom(2)), Cons(Atom(2), Cons(Atom(3), Cons(Atom(4), SNil))))
           ) shouldEqual """
             |Cons(
-            |  car = Atom(value = 1),
+            |  car = Cons(
+            |    car = Atom(value = 1),
+            |    cdr = Atom(value = 2)
+            |  ),
             |  cdr = Cons(
             |    car = Atom(value = 2),
             |    cdr = Cons(

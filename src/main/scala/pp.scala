@@ -2,7 +2,8 @@ package com.todesking.scalapp
 
 object ScalaPP {
   def format(value: Any): String = {
-    val formatter = new Layout(80, 0)
+    // `optimalwidth` parameter is meaningless for this use case.
+    val formatter = new Layout(0, 0)
     format(value, formatter)
     formatter.toString.trim
   }
@@ -10,9 +11,9 @@ object ScalaPP {
   def format(value: Any, formatter: Layout): Unit = {
     value match {
       case str:String =>
-        formatter.appendUnbreakable(s""""${str.replaceAll("\"", "\\\\\"")}"""")
+        formatter.appendRaw(s""""${str.replaceAll("\"", "\\\\\"")}"""")
       case x =>
-        asCaseClass(x).map(formatCaseClass(_, formatter)) getOrElse formatter.appendUnbreakable(x.toString)
+        asCaseClass(x).map(formatCaseClass(_, formatter)) getOrElse formatter.appendRaw(x.toString)
     }
   }
 
@@ -51,12 +52,13 @@ object ScalaPP {
           formatter.appendRaw(name)
           formatter.appendRaw(" = ")
           format(value, formatter)
-          if(i < cc.members.size - 1)
+          if(i < cc.members.size - 1) {
+            formatter.cancelTerminateLine()
             formatter.appendRaw(", ")
+          }
           formatter.terminateLine()
         }
       }
-      formatter.terminateLine()
       formatter.appendRaw(")")
       formatter.terminateLine()
     } else {
@@ -66,8 +68,10 @@ object ScalaPP {
         formatter.appendRaw(name)
         formatter.appendRaw(" = ")
         format(value, formatter)
-        if(i < cc.members.size - 1)
+        if(i < cc.members.size - 1) {
+          formatter.cancelTerminateLine()
           formatter.appendRaw(", ")
+        }
       }
       formatter.appendRaw(")")
     }
@@ -97,6 +101,12 @@ object ScalaPP {
       cancelNextSpacing = true
       currentLine = currentLine.replaceAll("""\s+\z""", "")
     }
+
+    def cancelTerminateLine(): Unit =
+      if(!hasCurrentLineContent && lines.lastOption.nonEmpty) {
+        currentLine = lines.last
+        lines.remove(lines.size - 1)
+      }
 
     def requireEmptyLines(n:Int):Unit = {
       terminateLine()
