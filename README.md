@@ -28,7 +28,7 @@ trait Tree
 case class Node(l: Tree, r: Tree) extends Tree
 case class Leaf(value: Any) extends Tree
 
-scala > Node(Leaf(1),Node(Node(Leaf(1),Node(Leaf(1),Leaf(2))),Leaf(9))).pp()
+scala> Node(Leaf(1),Node(Node(Leaf(1),Node(Leaf(1),Leaf(2))),Leaf(9))).pp()
 Node(
   l = Leaf(value = 1),
   r = Node(
