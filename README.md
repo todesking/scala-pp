@@ -50,7 +50,7 @@ Node(
 res4: Node = Node(Leaf(1),Node(Node(Leaf(1),Node(Leaf(1),Leaf(2))),Leaf(9)))
 
 // Format style could change via implicit variable
-// NOTE: Make sure implicit val name to `defaultscalapp` to avoid conflict
+// NOTE: Make sure implicit val name to `defaultScalaPP` to avoid conflict
 scala> implicit val defaultScalaPP = new ScalaPP(showMemberName = true)
 scala> Node(Leaf(1),Node(Node(Leaf(1),Node(Leaf(1),Leaf(2))),Leaf(9))).pp()
 Node(
