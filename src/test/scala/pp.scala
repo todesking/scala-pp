@@ -11,6 +11,8 @@ object CaseClassesForTest {
 }
 
 class PPSpec extends FunSpec with Matchers {
+  implicit val defaultScalaPP = ()
+  implicit val format = new ScalaPP(showMemberName = true)
   describe("ScalaPP") {
     describe("#format()") {
       it("should format literals") {
@@ -73,6 +75,20 @@ class PPSpec extends FunSpec with Matchers {
             |    )
             |  )
             |)""".stripMargin.trim
+        }
+
+        it("should format without member name if option is set") {
+          implicit val format = new ScalaPP(showMemberName = false)
+
+          ScalaPP.format(Cons(Cons(Atom(1), Atom(2)), SNil)) shouldEqual """
+          |Cons(
+          |  Cons(
+          |    Atom(1),
+          |    Atom(2)
+          |  ),
+          |  SNil
+          |)
+          """.stripMargin.trim
         }
       }
     }

@@ -1,6 +1,12 @@
 package com.todesking.scalapp
 
 object ScalaPP {
+  def format(value: Any)(implicit formatter: ScalaPP): String = {
+    formatter.format(value)
+  }
+}
+
+class ScalaPP(val showMemberName: Boolean) {
   def format(value: Any): String = {
     // `optimalwidth` parameter is meaningless for this use case.
     val formatter = new Layout(0, 0)
@@ -49,8 +55,10 @@ object ScalaPP {
       formatter.terminateLine()
       formatter.withIndent(2) {
         cc.members.zipWithIndex.foreach { case ((name, value), i) =>
-          formatter.appendRaw(name)
-          formatter.appendRaw(" = ")
+          if(showMemberName) {
+            formatter.appendRaw(name)
+            formatter.appendRaw(" = ")
+          }
           format(value, formatter)
           if(i < cc.members.size - 1) {
             formatter.cancelTerminateLine()
@@ -65,8 +73,10 @@ object ScalaPP {
       formatter.appendRaw(cc.name)
       formatter.appendRaw("(")
       cc.members.zipWithIndex.foreach { case ((name, value), i) =>
-        formatter.appendRaw(name)
-        formatter.appendRaw(" = ")
+        if(showMemberName) {
+          formatter.appendRaw(name)
+          formatter.appendRaw(" = ")
+        }
         format(value, formatter)
         if(i < cc.members.size - 1) {
           formatter.cancelTerminateLine()
