@@ -13,28 +13,34 @@ addSbtPlugin("com.todesking" %% "scala-pp" % "0.0.1")
 ## Usage
 
 ```scala
-import com.todesking.scalapp._
+scala> import com.todesking.scalapp._
 
-pp(1)
+scala> 1.pp()
 1
+res0: Int = 1
 
-"foo".pp
+
+scala> "foo".pp()
 "foo"
+res1: String = foo
 
 trait Tree
-case class Node(l: Tree, r: Tree) extends Node
-case class Leaf(value: Any) extends Node
+case class Node(l: Tree, r: Tree) extends Tree
+case class Leaf(value: Any) extends Tree
 
-Node(Leaf(1),Node(Node(Leaf(1),Node(Leaf(1),Leaf(2))),Leaf(9))).pp
+scala > Node(Leaf(1),Node(Node(Leaf(1),Node(Leaf(1),Leaf(2))),Leaf(9))).pp()
 Node(
-  Leaf(1),
-  Node(
-    Node(
-      Leaf(1),
-      Node(Leaf(1), Leaf(2))
+  l = Leaf(value = 1),
+  r = Node(
+    l = Node(
+      l = Leaf(value = 1),
+      r = Node(
+        l = Leaf(value = 1),
+        r = Leaf(value = 2)
+      )
     ),
-    Leaf(9)
+    r = Leaf(value = 9)
   )
 )
-
+res4: Node = Node(Leaf(1),Node(Node(Leaf(1),Node(Leaf(1),Leaf(2))),Leaf(9)))
 ```
