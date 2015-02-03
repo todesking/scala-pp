@@ -108,6 +108,18 @@ class PPSpec extends FunSpec with Matchers {
       123.pp()
     }
   }
+  describe("Any#tapp") {
+    it("should execute block and return this") {
+      import com.todesking.scalapp.ext.Tapp
+      var value: Any = null
+      var out: Any = null
+
+      1.tapp{ n => value = n; n + 1 }{a => out = a}
+
+      value shouldEqual 1
+      out shouldEqual "2"
+    }
+  }
 }
 
 
