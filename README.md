@@ -11,7 +11,7 @@ Scala 2.11.x (Unfortunately, 2.10.x is not supported yet)
 ```scala
 resolvers += "com.todesking" at "http://todesking.github.io/mvn/"
 
-addSbtPlugin("com.todesking" %% "scala-pp" % "0.0.1")
+addSbtPlugin("com.todesking" %% "scala-pp" % "0.0.2")
 ```
 
 ## Usage
