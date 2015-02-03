@@ -240,6 +240,12 @@ class ScalaPP(val showMemberName: Boolean) {
 }
 
 object ext {
+  implicit class Pp[A](self: A) {
+    def pp(log: String => Unit = println(_))(implicit format: ScalaPP): A = {
+      log(ScalaPP.format(self)(format))
+      self
+    }
+  }
   implicit class Tapp[A](self: A) {
     def tapp[B](f: A => B)(log: String => Unit = println(_))(implicit format: ScalaPP): A = {
       self.tap{ s => f(s).pp(log)(format) }

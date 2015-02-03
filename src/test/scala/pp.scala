@@ -94,6 +94,7 @@ class PPSpec extends FunSpec with Matchers {
     }
   }
   describe("Any#pp") {
+    import com.todesking.scalapp.ext.Pp
     def nullPrint(s: String): Unit = ()
     it("should return this") {
       1.pp(nullPrint) shouldEqual 1
