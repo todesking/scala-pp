@@ -1,23 +1,49 @@
 package com.todesking.scalapp
 
 object ScalaPP {
-  def format(value: Any)(implicit formatter: Formatter = defaultFormatter): String = {
-    formatter.format(value)
+  def format(value: Any)(implicit format: Format = defaultFormat): String = {
+    format(value)
   }
 
-  val defaultFormatter = new DefaultFormatter(false)
+  def pp(value: Any)(implicit format: Format = defaultFormat, out: Out = defaultOut): Unit = {
+    out(format(value))
+  }
+
+  val defaultFormat = new DefaultFormat(false)
+  val defaultOut = Out.println
 }
 
-trait Formatter {
-  def format(value: Any): String
+trait Out {
+  def apply(s: String): Unit
 }
 
-class DefaultFormatter(val showMemberName: Boolean) extends Formatter {
-  override def format(value: Any): String = {
+class CaptureOut extends Out {
+  var content: String = null
+  override def apply(s: String) = {
+    content = s
+  }
+}
+
+object Out {
+  def apply(f: String => Unit): Out = new Out {
+    override def apply(s: String) = f(s)
+  }
+
+  val println: Out = apply(Predef.println(_))
+  val nullOut: Out = apply{ _ => }
+  def capture(): CaptureOut = new CaptureOut
+}
+
+trait Format {
+  def apply(value: Any): String
+}
+
+class DefaultFormat(val showMemberName: Boolean) extends Format {
+  override def apply(value: Any): String = {
     // `optimalwidth` parameter is meaningless for this use case.
-    val formatter = new Layout(0, 0)
-    format(value, formatter)
-    formatter.toString.trim
+    val layout = new Layout(0, 0)
+    format(value, layout)
+    layout.toString.trim
   }
 
   def format(value: Any, formatter: Layout): Unit = {
@@ -245,16 +271,10 @@ class DefaultFormatter(val showMemberName: Boolean) extends Formatter {
   }
 }
 
-object ext {
+object syntax {
   implicit class Pp[A](self: A) {
-    def pp(log: String => Unit = println(_))(implicit format: Formatter = ScalaPP.defaultFormatter): A = {
-      log(ScalaPP.format(self)(format))
-      self
-    }
-  }
-  implicit class Tapp[A](self: A) {
-    def tapp[B](f: A => B)(log: String => Unit = println(_))(implicit format: Formatter = ScalaPP.defaultFormatter): A = {
-      self.tap{ s => f(s).pp(log)(format) }
+    def pp(implicit format: Format = ScalaPP.defaultFormat, out: Out = ScalaPP.defaultOut): A = {
+      self.tap(ScalaPP.pp(_))
     }
   }
   implicit class Tap[A](self: A) {

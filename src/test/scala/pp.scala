@@ -25,7 +25,7 @@ class PPSpec extends FunSpec with Matchers {
       }
       describe("with case classes") {
         import CaseClassesForTest._
-        implicit val format = new DefaultFormatter(showMemberName = true)
+        implicit val format = new DefaultFormat(showMemberName = true)
 
         it("should format the same as default toString() if the object is simple enough") {
           ScalaPP.format(SNil) shouldEqual "SNil"
@@ -77,7 +77,7 @@ class PPSpec extends FunSpec with Matchers {
         }
 
         it("should format without member name if option is set") {
-          implicit val format = new DefaultFormatter(showMemberName = false)
+          implicit val format = new DefaultFormat(showMemberName = false)
 
           ScalaPP.format(Cons(Cons(Atom(1), Atom(2)), SNil)) shouldEqual """
           |Cons(
@@ -93,36 +93,21 @@ class PPSpec extends FunSpec with Matchers {
     }
   }
   describe("Any#pp") {
-    import com.todesking.scalapp.ext.Pp
-    def nullPrint(s: String): Unit = ()
+    import com.todesking.scalapp.syntax.Pp
+    implicit val out = com.todesking.scalapp.Out.nullOut
+
     it("should return this") {
-      1.pp(nullPrint) shouldEqual 1
+      1.pp shouldEqual 1
     }
     it("should print formatted representation of this") {
-      var out: String = null
-      "123".pp(out = _)
-      out shouldEqual "\"123\""
-    }
-    it("should print to stdout when no parameter given") {
-      // FIXME: HOW to test that???
-      123.pp()
-    }
-  }
-  describe("Any#tapp") {
-    it("should execute block and pp result and return this") {
-      import com.todesking.scalapp.ext.Tapp
-      var value: Any = null
-      var out: Any = null
-
-      1.tapp{ n => value = n; n + 1 }{a => out = a} shouldEqual 1
-
-      value shouldEqual 1
-      out shouldEqual "2"
+      implicit val out = Out.capture()
+      "123".pp
+      out.content shouldEqual "\"123\""
     }
   }
   describe("Any#tap") {
     it("should execute block and return this") {
-      import com.todesking.scalapp.ext.Tap
+      import com.todesking.scalapp.syntax.Tap
       var value: Any = null
 
       1.tap{ n => value = n } shouldEqual 1
