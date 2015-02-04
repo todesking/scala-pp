@@ -17,7 +17,6 @@ addSbtPlugin("com.todesking" %% "scala-pp" % "0.0.2")
 ## Usage
 
 ```scala
-scala> import com.todesking.scalapp._
 scala> import com.todesking.scalapp.ext._
 
 scala> 1.pp()

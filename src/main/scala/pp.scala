@@ -1,13 +1,19 @@
 package com.todesking.scalapp
 
 object ScalaPP {
-  def format(value: Any)(implicit formatter: ScalaPP): String = {
+  def format(value: Any)(implicit formatter: Formatter = defaultFormatter): String = {
     formatter.format(value)
   }
+
+  val defaultFormatter = new DefaultFormatter(false)
 }
 
-class ScalaPP(val showMemberName: Boolean) {
-  def format(value: Any): String = {
+trait Formatter {
+  def format(value: Any): String
+}
+
+class DefaultFormatter(val showMemberName: Boolean) extends Formatter {
+  override def format(value: Any): String = {
     // `optimalwidth` parameter is meaningless for this use case.
     val formatter = new Layout(0, 0)
     format(value, formatter)
@@ -241,13 +247,13 @@ class ScalaPP(val showMemberName: Boolean) {
 
 object ext {
   implicit class Pp[A](self: A) {
-    def pp(log: String => Unit = println(_))(implicit format: ScalaPP): A = {
+    def pp(log: String => Unit = println(_))(implicit format: Formatter = ScalaPP.defaultFormatter): A = {
       log(ScalaPP.format(self)(format))
       self
     }
   }
   implicit class Tapp[A](self: A) {
-    def tapp[B](f: A => B)(log: String => Unit = println(_))(implicit format: ScalaPP): A = {
+    def tapp[B](f: A => B)(log: String => Unit = println(_))(implicit format: Formatter = ScalaPP.defaultFormatter): A = {
       self.tap{ s => f(s).pp(log)(format) }
     }
   }
