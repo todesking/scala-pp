@@ -14,6 +14,10 @@ Scala 2.11.x (Unfortunately, 2.10.x is not supported yet)
 
 Under development, API will change.
 
+* TODO: Support collections
+* TODO: Respect user-defined toString() in case classes
+* TODO: Customizable formatter
+
 ## Install
 
 ```scala
