@@ -10,7 +10,7 @@ object ScalaPP {
   }
 
   val defaultFormat = new DefaultFormat(false)
-  val defaultOut = Out.println
+  val defaultOut = Out.stdout
 }
 
 trait Out {
@@ -29,7 +29,8 @@ object Out {
     override def apply(s: String) = f(s)
   }
 
-  val println: Out = apply(Predef.println(_))
+  val stdout: Out = apply(System.out.println(_))
+  val stderr: Out = apply(System.err.println(_))
   val nullOut: Out = apply{ _ => }
   def capture(): CaptureOut = new CaptureOut
 }
