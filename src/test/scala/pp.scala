@@ -23,6 +23,12 @@ class PPSpec extends FunSpec with Matchers {
         val obj = new AnyRef()
         ScalaPP.format(obj) shouldEqual obj.toString
       }
+      it("should format List") {
+        ScalaPP.format(List(1)) shouldEqual "List(1)"
+      }
+      it("should format Map") {
+        ScalaPP.format(Map(1 -> "foo", 2 -> "bar")) shouldEqual """Map(1 -> "foo", 2 -> "bar")"""
+      }
       describe("with case classes") {
         import CaseClassesForTest._
         implicit val format = new DefaultFormat(showMemberName = true)

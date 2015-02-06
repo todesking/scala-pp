@@ -51,6 +51,10 @@ class DefaultFormat(val showMemberName: Boolean) extends Format {
     value match {
       case str:String =>
         formatter.appendRaw(s""""${str.replaceAll("\"", "\\\\\"")}"""")
+      case m: Map[_, _] =>
+        formatter.appendRaw(m.map{ case(k, v) => apply(k) -> apply(v) }.toString)
+      case s: Seq[_] =>
+          formatter.appendRaw(s.map(apply(_)).toString)
       case x =>
         asCaseClass(x).map(formatCaseClass(_, formatter)) getOrElse formatter.appendRaw(x.toString)
     }
