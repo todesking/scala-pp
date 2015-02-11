@@ -26,6 +26,13 @@ class PPSpec extends FunSpec with Matchers {
       }
       it("should format List") {
         ScalaPP.format(List(1)) shouldEqual "List(1)"
+
+        // 1    6    11   16   21
+        ScalaPP.format(List(1, 2, 3, 4, 5, 6)) shouldEqual """
+          |List(
+          |  1, 2, 3, 4, 5, 6
+          |)
+        """.stripMargin.trim
       }
       it("should format Map") {
         // 1    6    11   16   21

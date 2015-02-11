@@ -53,9 +53,8 @@ class DefaultFormat(val width: Int = 80, val showMemberName: Boolean = false) ex
         Text(s""""${str.replaceAll("\"", "\\\\\"")}"""")
       case m: Map[_, _] =>
         buildDocFromNamedProperties(m.stringPrefix, m.map{ case (k, v) => buildDoc(k) -> buildDoc(v) }, Text("->"))
-      case s: Seq[_] =>
-        // TODO
-        Text(s.map(apply(_)).toString)
+      case s: Traversable[_] =>
+        buildDocFromValues(s.stringPrefix, s.map(buildDoc(_)).toIterable)
       case x =>
         asCaseClass(x).map(buildDocFromCaseClass(_)) getOrElse Text(x.toString)
     }
@@ -104,6 +103,23 @@ class DefaultFormat(val width: Int = 80, val showMemberName: Boolean = false) ex
           } else {
             Group(value) ^^ suffix
           }
+        }.foldLeft[Doc](Nil){(a, x) => a ^| x}
+      }) ^^ Break("") ^^ Text(")")
+    }
+  }
+
+  def buildDocFromValues(name: String, values: Iterable[Doc]): Doc = {
+    import Doc._
+    Group {
+      Text(name) ^^ Text("(") ^^ Nest(2, Break("") ^^ Group {
+        values.zipWithIndex.map{ case (value, i) =>
+          val suffix =
+            if(i < values.size - 1) {
+              Text(",")
+            } else {
+              Nil
+            }
+          Group(value) ^^ suffix
         }.foldLeft[Doc](Nil){(a, x) => a ^| x}
       }) ^^ Break("") ^^ Text(")")
     }
