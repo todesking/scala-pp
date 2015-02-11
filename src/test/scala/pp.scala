@@ -34,6 +34,11 @@ class PPSpec extends FunSpec with Matchers {
           |)
         """.stripMargin.trim
       }
+      it("should format Stream") {
+        ScalaPP.format(Stream(1, 2, 3)) shouldEqual """
+          |Stream(1, ?)
+        """.stripMargin.trim
+      }
       it("should format Map") {
         // 1    6    11   16   21
         ScalaPP.format(Map(1 -> "foo", 2 -> "bar")) shouldEqual """

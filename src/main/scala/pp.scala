@@ -51,6 +51,11 @@ class DefaultFormat(val width: Int = 80, val showMemberName: Boolean = false) ex
     value match {
       case str:String =>
         Text(s""""${str.replaceAll("\"", "\\\\\"")}"""")
+      case s: Stream[_] =>
+        if(s.isEmpty)
+          buildDocFromValues(s.stringPrefix, Seq.empty)
+        else
+          buildDocFromValues(s.stringPrefix, Seq(buildDoc(s.head), Text("?")))
       case m: Map[_, _] =>
         buildDocFromNamedProperties(m.stringPrefix, m.map{ case (k, v) => buildDoc(k) -> buildDoc(v) }, Text("->"))
       case s: Traversable[_] =>
