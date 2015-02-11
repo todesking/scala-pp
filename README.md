@@ -56,19 +56,16 @@ res2: String = foo
 ```
 
 ```scala
-trait Tree
-case class Node(l: Tree, r: Tree) extends Tree
-case class Leaf(value: Any) extends Tree
+scala> import com.todesking.scalapp.syntax._
+
+scala> trait Tree
+scala> case class Node(l: Tree, r: Tree) extends Tree
+scala> case class Leaf(value: Any) extends Tree
 
 scala> Node(Leaf(1),Node(Node(Leaf(1),Node(Leaf(1),Leaf(2))),Leaf(9))).pp()
 Node(
   Leaf(1),
-  Node(
-    Node(
-      Leaf(1), Node(Leaf(1), Leaf(2))
-    ),
-    Leaf(9)
-  )
+  Node(Node(Leaf(1), Node(Leaf(1), Leaf(2))), Leaf(9))
 )
 res4: Node = Node(Leaf(1),Node(Node(Leaf(1),Node(Leaf(1),Leaf(2))),Leaf(9)))
 ```
