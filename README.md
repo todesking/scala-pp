@@ -65,11 +65,7 @@ Node(
   Leaf(1),
   Node(
     Node(
-      Leaf(1),
-      Node(
-        Leaf(1),
-        Leaf(2)
-      )
+      Leaf(1), Node(Leaf(1), Leaf(2))
     ),
     Leaf(9)
   )
@@ -84,17 +80,21 @@ scala> implicit val format = new com.todesking.scalapp.DefaultFormat(showMemberN
 scala> Node(Leaf(1),Node(Node(Leaf(1),Node(Leaf(1),Leaf(2))),Leaf(9))).pp()
 Node(
   l = Leaf(value = 1),
-  r = Node(
-    l = Node(
-      l = Leaf(value = 1),
-      r = Node(
-        l = Leaf(value = 1),
-        r = Leaf(value = 2)
-      )
-    ),
-    r = Leaf(value = 9)
-  )
+  r =
+    Node(
+      l =
+        Node(
+          l = Leaf(value = 1),
+          r =
+            Node(
+              l = Leaf(value = 1),
+              r = Leaf(value = 2)
+            )
+        ),
+      r = Leaf(value = 9)
+    )
 )
+res1: Node = Node(Leaf(1),Node(Node(Leaf(1),Node(Leaf(1),Leaf(2))),Leaf(9)))
 ```
 
 ### Change output destination
