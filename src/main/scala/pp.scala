@@ -9,7 +9,7 @@ object ScalaPP {
     out(format(value))
   }
 
-  val defaultFormat = new DefaultFormat(false)
+  val defaultFormat = new DefaultFormat(80, false)
   val defaultOut = Out.stdout
 }
 
@@ -39,24 +39,24 @@ trait Format {
   def apply(value: Any): String
 }
 
-class DefaultFormat(val showMemberName: Boolean) extends Format {
+class DefaultFormat(val width: Int = 80, val showMemberName: Boolean = false) extends Format {
   override def apply(value: Any): String = {
-    // `optimalwidth` parameter is meaningless for this use case.
-    val layout = new Layout(0, 0)
-    format(value, layout)
-    layout.toString.trim
+    pretty_printer.PrettyPrinter.pretty(width, buildDoc(value))
   }
 
-  def format(value: Any, formatter: Layout): Unit = {
+  def buildDoc(value: Any): pretty_printer.Doc = {
+    import pretty_printer.Doc._
     value match {
       case str:String =>
-        formatter.appendRaw(s""""${str.replaceAll("\"", "\\\\\"")}"""")
+        Text(s""""${str.replaceAll("\"", "\\\\\"")}"""")
       case m: Map[_, _] =>
-        formatter.appendRaw(m.map{ case(k, v) => apply(k) -> apply(v) }.toString)
+        // TODO
+        Text(m.map{ case(k, v) => apply(k) -> apply(v) }.toString)
       case s: Seq[_] =>
-          formatter.appendRaw(s.map(apply(_)).toString)
+        // TODO
+        Text(s.map(apply(_)).toString)
       case x =>
-        asCaseClass(x).map(formatCaseClass(_, formatter)) getOrElse formatter.appendRaw(x.toString)
+        asCaseClass(x).map(buildDocFromCaseClass(_)) getOrElse Text(x.toString)
     }
   }
 
@@ -85,42 +85,28 @@ class DefaultFormat(val showMemberName: Boolean) extends Format {
         false
     })
 
-  def formatCaseClass(cc: CaseClass, formatter: Layout): Unit = {
-    if(needMultiLineFormat(cc)) {
-      formatter.appendRaw(cc.name)
-      formatter.appendRaw("(")
-      formatter.terminateLine()
-      formatter.withIndent(2) {
-        cc.members.zipWithIndex.foreach { case ((name, value), i) =>
+  def buildDocFromCaseClass(cc: CaseClass): pretty_printer.Doc = {
+    import pretty_printer.Doc._
+    Group {
+      Text(cc.name) ^^ Text("(") ^^ Nest(2, Break("") ^^ Group {
+        cc.members.zipWithIndex.map{ case ((name, value), i) =>
+          val suffix =
+            if(i < cc.members.size - 1) {
+              Text(",")
+            } else {
+              Nil
+            }
           if(showMemberName) {
-            formatter.appendRaw(name)
-            formatter.appendRaw(" = ")
+            Nest(2, Group {
+              Group(Text(name) ^^ Text(" ") ^^ Text("=")) ^| Group(buildDoc(value)) ^^ suffix
+            })
+          } else {
+            Group {
+              buildDoc(value)
+            } ^^ suffix
           }
-          format(value, formatter)
-          if(i < cc.members.size - 1) {
-            formatter.cancelTerminateLine()
-            formatter.appendRaw(", ")
-          }
-          formatter.terminateLine()
-        }
-      }
-      formatter.appendRaw(")")
-      formatter.terminateLine()
-    } else {
-      formatter.appendRaw(cc.name)
-      formatter.appendRaw("(")
-      cc.members.zipWithIndex.foreach { case ((name, value), i) =>
-        if(showMemberName) {
-          formatter.appendRaw(name)
-          formatter.appendRaw(" = ")
-        }
-        format(value, formatter)
-        if(i < cc.members.size - 1) {
-          formatter.cancelTerminateLine()
-          formatter.appendRaw(", ")
-        }
-      }
-      formatter.appendRaw(")")
+        }.foldLeft[pretty_printer.Doc](Nil){(a, x) => a ^| x}
+      }) ^^ Break("") ^^ Text(")")
     }
   }
 
@@ -135,144 +121,6 @@ class DefaultFormat(val showMemberName: Boolean) extends Format {
         }.zip(
           mirror.instance.asInstanceOf[Product].productIterator.toIterable
         ).toSeq
-  }
-
-  // TODO: This Layout class is from com.todesking % dox. That should be independent library.
-  class Layout(optimalWidth:Int, private var indentLevel:Int) {
-    import scala.collection.mutable
-    private var lines = mutable.ArrayBuffer.empty[String]
-    private var currentLine:String = ""
-    private var cancelNextSpacing = false
-
-    def cancelSpacing():Unit = {
-      cancelNextSpacing = true
-      currentLine = currentLine.replaceAll("""\s+\z""", "")
-    }
-
-    def cancelTerminateLine(): Unit =
-      if(!hasCurrentLineContent && lines.lastOption.nonEmpty) {
-        currentLine = lines.last
-        lines.remove(lines.size - 1)
-      }
-
-    def requireEmptyLines(n:Int):Unit = {
-      terminateLine()
-      val emptyLines = lines.reverse.takeWhile(_.isEmpty).size
-      0 until ((n - emptyLines) max 0) foreach { _=> newLine() }
-    }
-
-    def restWidth:Int = optimalWidth - indentLevel
-
-    override def toString() =
-      lines.mkString("\n") + currentLine + "\n"
-
-    def appendRaw(str: String): Unit =
-      currentLine += str
-
-    def appendText(str:String):Unit =
-      doMultiLine(str)(appendBreakable0)
-
-    def appendUnbreakable(str:String):Unit =
-      doMultiLine(str)(appendUnbreakable0(_, needSpacing = true))
-
-    def appendEqualSpaced(parts:String*):Unit = {
-      parts.size match {
-        case 0 => newLine()
-        case 1 =>
-          val pad = " " * ((restWidth - width(parts(0))) / 2).max(0)
-          appendUnbreakable(pad + parts(0))
-        case _ =>
-          val pad = " " * ((restWidth - parts.map(width(_)).sum) / (parts.size - 1)).max(1)
-          appendUnbreakable(parts.mkString(pad))
-      }
-    }
-
-    private[this] def doMultiLine(str:String)(f:String => Unit):Unit = {
-      val lines = str.split("\n")
-      assert(lines.nonEmpty)
-      lines.dropRight(1).foreach {line =>
-        f(line)
-        newLine()
-      }
-      f(lines.last)
-    }
-
-    private[this] def hasCurrentLineContent():Boolean =
-      currentLine.nonEmpty && currentLine != " " * indentLevel
-
-    def indent(n:Int):Unit = {
-      require(indentLevel + n >= 0)
-      if(!hasCurrentLineContent) {
-        indentLevel += n
-        currentLine = " " * indentLevel
-      } else {
-        indentLevel += n
-      }
-    }
-
-    def withIndent(n:Int)(f: =>Unit):Unit = {
-      indent(n)
-      f
-      indent(-n)
-    }
-
-    def terminateLine():Unit = {
-      if(hasCurrentLineContent) {
-        newLine()
-      }
-    }
-
-    def newLine():Unit = {
-      lines += currentLine.replaceAll("""\s+$""", "")
-      currentLine = " " * indentLevel
-    }
-
-    private[this] def appendBreakable0(str:String):Unit = {
-      val words = str.split("""\s+""").filter(_.nonEmpty)
-      words.foreach { word =>
-        appendUnbreakable0(word, needSpacing = true)
-      }
-    }
-
-    private[this] def appendUnbreakable0(str:String, needSpacing:Boolean):Unit = {
-      if(!hasCurrentLineContent) {
-        currentLine += str
-      } else if(needSpacing && !cancelNextSpacing && needSpacingBeyond(currentLine.last, str)) {
-        val spaced = " " + str
-        if(needNewLine(width(spaced))) {
-          newLine()
-          currentLine += str
-        } else {
-          currentLine += spaced
-        }
-      } else if(needNewLine(width(str)) && canNextLine(str)) {
-        newLine()
-        currentLine += str
-      } else {
-        currentLine += str
-      }
-      cancelNextSpacing = false
-    }
-
-    private[this] def needSpacingBeyond(c:Char, s:String):Boolean = {
-      s.nonEmpty && (s(0) match {
-        case ' ' | ')' | ']' | ';' | '.' | ',' => false
-        case _ => true
-      }) && (c match {
-        case ' ' | '[' | '(' => false
-        case _ => true
-      })
-    }
-
-    private[this] def needNewLine(w:Int):Boolean =
-      indentLevel < width(currentLine) && w + width(currentLine) > optimalWidth
-
-    private[this] def canNextLine(s:String):Boolean =
-      "!.,:;)]}>".contains(s(0)).unary_!
-
-    def width(line:String):Int = {
-      line.length
-    }
   }
 }
 

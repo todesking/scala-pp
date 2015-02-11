@@ -31,68 +31,42 @@ class PPSpec extends FunSpec with Matchers {
       }
       describe("with case classes") {
         import CaseClassesForTest._
-        implicit val format = new DefaultFormat(showMemberName = true)
+        implicit val format = new DefaultFormat(width = 20, showMemberName = true)
 
         it("should format the same as default toString() if the object is simple enough") {
           ScalaPP.format(SNil) shouldEqual "SNil"
-          ScalaPP.format(Cons(Atom(1), Atom(2)))
         }
 
-        it("should format with indent if the object has > 1 fields and any field's value is nested") {
+        it("should format with indent") {
           val complex = Cons(Atom(1), Cons(Atom(2), SNil))
+          // 1    6    11   16   21
           ScalaPP.format(complex) shouldEqual """
             |Cons(
-            |  car = Atom(value = 1),
-            |  cdr = Cons(
-            |    car = Atom(value = 2),
-            |    cdr = SNil
-            |  )
-            |)""".stripMargin.trim
-        }
-
-        it("should format to pretty style") {
-          ScalaPP.format(Cons(Cons(Atom(1), Atom(2)), Atom(3))) shouldEqual """
-          |Cons(
-          |  car = Cons(
-          |    car = Atom(value = 1),
-          |    cdr = Atom(value = 2)
-          |  ),
-          |  cdr = Atom(value = 3)
-          |)
-          """.stripMargin.trim
-
-          ScalaPP.format(
-            Cons(Cons(Atom(1), Atom(2)), Cons(Atom(2), Cons(Atom(3), Cons(Atom(4), SNil))))
-          ) shouldEqual """
-            |Cons(
-            |  car = Cons(
-            |    car = Atom(value = 1),
-            |    cdr = Atom(value = 2)
-            |  ),
-            |  cdr = Cons(
-            |    car = Atom(value = 2),
-            |    cdr = Cons(
-            |      car = Atom(value = 3),
-            |      cdr = Cons(
-            |        car = Atom(value = 4),
-            |        cdr = SNil
-            |      )
+            |  car =
+            |    Atom(value = 1),
+            |  cdr =
+            |    Cons(
+            |      car =
+            |        Atom(
+            |          value = 2
+            |        ),
+            |      cdr = SNil
             |    )
-            |  )
             |)""".stripMargin.trim
         }
 
         it("should format without member name if option is set") {
-          implicit val format = new DefaultFormat(showMemberName = false)
+          implicit val format = new DefaultFormat(width = 20, showMemberName = false)
+          println(ScalaPP.format(Cons(Cons(Atom(1), Atom(2)), SNil)))
 
+          // 1    6    11   16   21
           ScalaPP.format(Cons(Cons(Atom(1), Atom(2)), SNil)) shouldEqual """
-          |Cons(
-          |  Cons(
-          |    Atom(1),
-          |    Atom(2)
-          |  ),
-          |  SNil
-          |)
+            |Cons(
+            |  Cons(
+            |    Atom(1), Atom(2)
+            |  ),
+            |  SNil
+            |)
           """.stripMargin.trim
         }
       }
