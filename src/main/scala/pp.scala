@@ -154,7 +154,7 @@ class DefaultFormat(val width: Int = 80, val showMemberName: Boolean = false) ex
 
 object syntax {
   implicit class Pp[A](self: A) {
-    def pp(implicit format: Format = ScalaPP.defaultFormat, out: Out = ScalaPP.defaultOut): A = {
+    def pp()(implicit format: Format = ScalaPP.defaultFormat, out: Out = ScalaPP.defaultOut): A = {
       self.tap(ScalaPP.pp(_))
     }
   }
