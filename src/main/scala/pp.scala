@@ -9,7 +9,7 @@ object ScalaPP {
     out(format(value))
   }
 
-  val defaultFormat = new DefaultFormat(80, false)
+  val defaultFormat = new DefaultFormat(60, false)
   val defaultOut = Out.stdout
 }
 
