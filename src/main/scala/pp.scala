@@ -141,9 +141,6 @@ class DefaultFormat(val width: Int = 80, val showMemberName: Boolean = false) ex
     )
   }
 
-  def needMultiLineFormat(cc: CaseClass): Boolean =
-    cc.members.size > 1 && cc.members.exists {case (name, value) => asCaseClass(value).nonEmpty}
-
   case class CaseClass(mirror: scala.reflect.api.Mirrors#InstanceMirror) {
     def name(): String = mirror.symbol.name.toString
     def members(): Seq[(String, Any)] =
