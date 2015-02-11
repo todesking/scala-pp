@@ -52,8 +52,7 @@ class DefaultFormat(val width: Int = 80, val showMemberName: Boolean = false) ex
       case str:String =>
         Text(s""""${str.replaceAll("\"", "\\\\\"")}"""")
       case m: Map[_, _] =>
-        // TODO
-        Text(m.map{ case(k, v) => apply(k) -> apply(v) }.toString)
+        buildDocFromNamedProperties(m.stringPrefix, m.map{ case (k, v) => buildDoc(k) -> buildDoc(v) }, Text("->"))
       case s: Seq[_] =>
         // TODO
         Text(s.map(apply(_)).toString)
@@ -87,7 +86,7 @@ class DefaultFormat(val width: Int = 80, val showMemberName: Boolean = false) ex
         false
     })
 
-  def buildDocFromNamedProperties(name: String, properties: Seq[(String, Doc)], op: String): Doc = {
+  def buildDocFromNamedProperties(name: String, properties: Iterable[(Doc, Doc)], arrow: Doc): Doc = {
     import Doc._
     Group {
       Text(name) ^^ Text("(") ^^ Nest(2, Break("") ^^ Group {
@@ -100,7 +99,7 @@ class DefaultFormat(val width: Int = 80, val showMemberName: Boolean = false) ex
             }
           if(showMemberName) {
             Nest(2, Group {
-              Group(Text(propName) ^^ Text(" ") ^^ Text(op)) ^| Group(value) ^^ suffix
+              Group(propName ^^ Text(" ") ^^ arrow) ^| Group(value) ^^ suffix
             })
           } else {
             Group(value) ^^ suffix
@@ -111,10 +110,11 @@ class DefaultFormat(val width: Int = 80, val showMemberName: Boolean = false) ex
   }
 
   def buildDocFromCaseClass(cc: CaseClass): Doc = {
+    import Doc._
     buildDocFromNamedProperties(
       cc.name,
-      cc.members.map{case (name, value) => name -> buildDoc(value)},
-      "="
+      cc.members.map{case (name, value) => Text(name) -> buildDoc(value)},
+      Text("=")
     )
   }
 

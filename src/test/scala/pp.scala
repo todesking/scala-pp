@@ -13,6 +13,7 @@ object CaseClassesForTest {
 class PPSpec extends FunSpec with Matchers {
   describe("ScalaPP") {
     describe("#format()") {
+      implicit val format = new DefaultFormat(width = 20, showMemberName = true)
       it("should format literals") {
         ScalaPP.format(1) shouldEqual "1"
         ScalaPP.format("foo") shouldEqual "\"foo\""
@@ -27,7 +28,13 @@ class PPSpec extends FunSpec with Matchers {
         ScalaPP.format(List(1)) shouldEqual "List(1)"
       }
       it("should format Map") {
-        ScalaPP.format(Map(1 -> "foo", 2 -> "bar")) shouldEqual """Map(1 -> "foo", 2 -> "bar")"""
+        // 1    6    11   16   21
+        ScalaPP.format(Map(1 -> "foo", 2 -> "bar")) shouldEqual """
+          |Map(
+          |  1 -> "foo",
+          |  2 -> "bar"
+          |)
+        """.stripMargin.trim
       }
       describe("with case classes") {
         import CaseClassesForTest._
