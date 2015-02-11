@@ -40,12 +40,14 @@ trait Format {
 }
 
 class DefaultFormat(val width: Int = 80, val showMemberName: Boolean = false) extends Format {
+  import pretty_printer.{Doc, PrettyPrinter}
+
   override def apply(value: Any): String = {
     pretty_printer.PrettyPrinter.pretty(width, buildDoc(value))
   }
 
-  def buildDoc(value: Any): pretty_printer.Doc = {
-    import pretty_printer.Doc._
+  def buildDoc(value: Any): Doc = {
+    import Doc._
     value match {
       case str:String =>
         Text(s""""${str.replaceAll("\"", "\\\\\"")}"""")
@@ -85,29 +87,35 @@ class DefaultFormat(val width: Int = 80, val showMemberName: Boolean = false) ex
         false
     })
 
-  def buildDocFromCaseClass(cc: CaseClass): pretty_printer.Doc = {
-    import pretty_printer.Doc._
+  def buildDocFromNamedProperties(name: String, properties: Seq[(String, Doc)], op: String): Doc = {
+    import Doc._
     Group {
-      Text(cc.name) ^^ Text("(") ^^ Nest(2, Break("") ^^ Group {
-        cc.members.zipWithIndex.map{ case ((name, value), i) =>
+      Text(name) ^^ Text("(") ^^ Nest(2, Break("") ^^ Group {
+        properties.zipWithIndex.map{ case ((propName, value), i) =>
           val suffix =
-            if(i < cc.members.size - 1) {
+            if(i < properties.size - 1) {
               Text(",")
             } else {
               Nil
             }
           if(showMemberName) {
             Nest(2, Group {
-              Group(Text(name) ^^ Text(" ") ^^ Text("=")) ^| Group(buildDoc(value)) ^^ suffix
+              Group(Text(propName) ^^ Text(" ") ^^ Text(op)) ^| Group(value) ^^ suffix
             })
           } else {
-            Group {
-              buildDoc(value)
-            } ^^ suffix
+            Group(value) ^^ suffix
           }
-        }.foldLeft[pretty_printer.Doc](Nil){(a, x) => a ^| x}
+        }.foldLeft[Doc](Nil){(a, x) => a ^| x}
       }) ^^ Break("") ^^ Text(")")
     }
+  }
+
+  def buildDocFromCaseClass(cc: CaseClass): Doc = {
+    buildDocFromNamedProperties(
+      cc.name,
+      cc.members.map{case (name, value) => name -> buildDoc(value)},
+      "="
+    )
   }
 
   def needMultiLineFormat(cc: CaseClass): Boolean =
