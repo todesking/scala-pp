@@ -51,6 +51,8 @@ class DefaultFormat(val width: Int = 80, val showMemberName: Boolean = false) ex
     value match {
       case str:String =>
         Text(s""""${str.replaceAll("\"", "\\\\\"")}"""")
+      case a: Array[_] =>
+        buildDocFromValues("Array", a.map(buildDoc(_)))
       case s: Stream[_] =>
         if(s.isEmpty)
           buildDocFromValues(s.stringPrefix, Seq.empty)

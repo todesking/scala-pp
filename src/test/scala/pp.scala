@@ -24,6 +24,9 @@ class PPSpec extends FunSpec with Matchers {
         val obj = new AnyRef()
         ScalaPP.format(obj) shouldEqual obj.toString
       }
+      it("should format Array") {
+        ScalaPP.format(Array(1, 2, 3)) shouldEqual "Array(1, 2, 3)"
+      }
       it("should format empty List") {
         ScalaPP.format(List.empty) shouldEqual "List()"
       }
