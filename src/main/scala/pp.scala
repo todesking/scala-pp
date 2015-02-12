@@ -51,6 +51,14 @@ class DefaultFormat(val width: Int = 80, val showMemberName: Boolean = false) ex
     value match {
       case str:String =>
         Text(s""""${str.replaceAll("\"", "\\\\\"")}"""")
+      case r: scala.collection.immutable.Range =>
+        val op =
+          if(r.isInclusive) Text("to")
+          else Text("until")
+        val by =
+          if(r.step != 1) Text("by") ^| buildDoc(r.step)
+          else Nil
+        Text("Range(") ^^ buildDoc(r.start) ^| op ^| buildDoc(r.end) ^| by ^^ Text(")")
       case a: Array[_] =>
         buildDocFromValues("Array", a.map(buildDoc(_)))
       case s: Stream[_] =>
