@@ -30,6 +30,12 @@ class PPSpec extends FunSpec with Matchers {
         ScalaPP.format(1 until 10) shouldEqual "Range(1 until 10)"
         ScalaPP.format(1 to 10 by 2) shouldEqual "Range(1 to 10 by 2)"
       }
+      it("should format NumericRange") {
+        implicit val format = new DefaultFormat(width = 999, showMemberName = false)
+        ScalaPP.format(1L to 10L) shouldEqual "NumericRange(1 to 10)"
+        ScalaPP.format(1L until 10L) shouldEqual "NumericRange(1 until 10)"
+        ScalaPP.format(1L to 10L by 2) shouldEqual "NumericRange(1 to 10 by 2)"
+      }
       it("should format Array") {
         ScalaPP.format(Array(1, 2, 3)) shouldEqual "Array(1, 2, 3)"
       }

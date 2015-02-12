@@ -61,6 +61,14 @@ class DefaultFormat(val width: Int = 80, val showMemberName: Boolean = false) ex
           if(r.step != 1) Text("by") ^| buildDoc(r.step)
           else Nil
         Text("Range(") ^^ buildDoc(r.start) ^| op ^| buildDoc(r.end) ^| by ^^ Text(")")
+      case r: scala.collection.immutable.NumericRange[_] =>
+        val op =
+          if(r.isInclusive) Text("to")
+          else Text("until")
+        val by =
+          if(r.step != 1) Text("by") ^| buildDoc(r.step)
+          else Nil
+        Text("NumericRange(") ^^ buildDoc(r.start) ^| op ^| buildDoc(r.end) ^| by ^^ Text(")")
       case a: Array[_] =>
         buildDocFromValues("Array", a.map(buildDoc(_)))
       case s: Stream[_] =>
