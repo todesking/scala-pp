@@ -66,7 +66,7 @@ class DefaultFormat(val width: Int = 80, val showMemberName: Boolean = false) ex
         val by =
           if(r.step != 1) Text("by") ^| buildDoc(r.step)
           else Nil
-        Text("Range(") ^^ buildDoc(r.start) ^| op ^| buildDoc(r.end) ^| by ^^ Text(")")
+        buildDocFromRange("Range", buildDoc(r.start), op, buildDoc(r.end), by)
       case r: scala.collection.immutable.NumericRange[_] =>
         val op =
           if(r.isInclusive) Text("to")
@@ -74,7 +74,7 @@ class DefaultFormat(val width: Int = 80, val showMemberName: Boolean = false) ex
         val by =
           if(r.step != 1) Text("by") ^| buildDoc(r.step)
           else Nil
-        Text("NumericRange(") ^^ buildDoc(r.start) ^| op ^| buildDoc(r.end) ^| by ^^ Text(")")
+        buildDocFromRange("NumericRange", buildDoc(r.start), op, buildDoc(r.end), by)
       case a: Array[_] =>
         buildDocFromValues("Array", a.map(buildDoc(_)))
       case s: Stream[_] =>
@@ -115,6 +115,11 @@ class DefaultFormat(val width: Int = 80, val showMemberName: Boolean = false) ex
       case _ =>
         false
     })
+
+  def buildDocFromRange(name: String, start: Doc, op: Doc, end: Doc, by: Doc): Doc = {
+    import Doc._
+    Text(name) ^^ Text("(") ^^ Nest(2, Break("") ^^ Group(start ^| Group(op ^| end) ^| Group(by))) ^^ Break("") ^^ Text(")")
+  }
 
   def buildDocFromNamedProperties(name: String, properties: Iterable[(Doc, Doc)], arrow: Doc): Doc = {
     import Doc._

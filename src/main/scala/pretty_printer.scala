@@ -16,7 +16,7 @@ sealed abstract class Doc {
   def ^^(y: Doc) =
     Cons(this, y)
 
-  def ^|(y: Doc) = (this, y) match {
+  def ^|(y: Doc) = (Doc.simplify(this), Doc.simplify(y)) match {
     case (Nil, _) => y
     case (_, Nil) => this
     case (x, y) => x ^^ Break() ^^ y
@@ -66,6 +66,27 @@ object Doc {
     case (i, m, Group(x))          :: z =>
       if(fits(w - k, (i, Mode.Flat, x)::z)) format(w, k, (i, Mode.Flat, x)::z)
       else format(w, k, (i, Mode.Break, x)::z)
+  }
+
+  def simplify(d: Doc): Doc = d match {
+    case Cons(car, cdr) =>
+      (simplify(car), simplify(cdr)) match {
+        case (Nil, Nil) => Nil
+        case (x, Nil) => x
+        case (Nil, x) => x
+        case (x, y) => Cons(x, y)
+      }
+    case Nest(l, x) =>
+      simplify(x) match {
+        case Nil => Nil
+        case x => Nest(l, x)
+      }
+    case Group(x) =>
+      simplify(x) match {
+        case Nil => Nil
+        case x => Group(x)
+      }
+    case other => other
   }
 }
 
