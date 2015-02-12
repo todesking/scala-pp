@@ -19,7 +19,7 @@ Under development, API will change.
 ```scala
 resolvers += "com.todesking" at "http://todesking.github.io/mvn/"
 
-libraryDependencies += "com.todesking" %% "scala-pp" % "0.0.3"
+libraryDependencies += "com.todesking" %% "scala-pp" % "0.0.4"
 ```
 
 ## Usage

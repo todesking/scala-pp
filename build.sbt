@@ -1,6 +1,6 @@
 name := "scala-pp"
 
-version := "0.0.4-SNAPSHOT"
+version := "0.0.5-SNAPSHOT"
 
 organization := "com.todesking"
 
