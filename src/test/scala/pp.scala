@@ -19,6 +19,9 @@ class PPSpec extends FunSpec with Matchers {
         ScalaPP.format("foo") shouldEqual "\"foo\""
         ScalaPP.format("\"") shouldEqual "\"\\\"\""
         ScalaPP.format('a') shouldEqual "'a'"
+        ScalaPP.format(1.0) shouldEqual "1.0"
+        ScalaPP.format(1.0f) shouldEqual "1.0f"
+        ScalaPP.format(1L) shouldEqual "1L"
       }
 
       it("should format other objects with toString()") {
@@ -32,9 +35,9 @@ class PPSpec extends FunSpec with Matchers {
       }
       it("should format NumericRange") {
         implicit val format = new DefaultFormat(width = 999, showMemberName = false)
-        ScalaPP.format(1L to 10L) shouldEqual "NumericRange(1 to 10)"
-        ScalaPP.format(1L until 10L) shouldEqual "NumericRange(1 until 10)"
-        ScalaPP.format(1L to 10L by 2) shouldEqual "NumericRange(1 to 10 by 2)"
+        ScalaPP.format(1L to 10L) shouldEqual "NumericRange(1L to 10L)"
+        ScalaPP.format(1L until 10L) shouldEqual "NumericRange(1L until 10L)"
+        ScalaPP.format(1L to 10L by 2) shouldEqual "NumericRange(1L to 10L by 2L)"
       }
       it("should format Array") {
         ScalaPP.format(Array(1, 2, 3)) shouldEqual "Array(1, 2, 3)"

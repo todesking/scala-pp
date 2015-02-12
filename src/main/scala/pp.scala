@@ -53,6 +53,12 @@ class DefaultFormat(val width: Int = 80, val showMemberName: Boolean = false) ex
         Text(s""""${str.replaceAll("\"", "\\\\\"")}"""")
       case c: Char =>
         Text(s"'${c}'")
+      case _: Int | Double =>
+        Text(value.toString)
+      case f: Float =>
+        Text(s"${f}f")
+      case l: Long =>
+        Text(s"${l}L")
       case r: scala.collection.immutable.Range =>
         val op =
           if(r.isInclusive) Text("to")
