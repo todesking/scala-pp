@@ -18,6 +18,7 @@ class PPSpec extends FunSpec with Matchers {
         ScalaPP.format(1) shouldEqual "1"
         ScalaPP.format("foo") shouldEqual "\"foo\""
         ScalaPP.format("\"") shouldEqual "\"\\\"\""
+        ScalaPP.format('a') shouldEqual "'a'"
       }
 
       it("should format other objects with toString()") {
