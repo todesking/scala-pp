@@ -28,6 +28,11 @@ class PPSpec extends FunSpec with Matchers {
         val obj = new AnyRef()
         ScalaPP.format(obj) shouldEqual obj.toString
       }
+
+      it("should format tuple") {
+        ScalaPP.format(1 -> 2L) shouldEqual "(1, 2L)"
+      }
+
       it("should format range") {
         ScalaPP.format(1 to 10) shouldEqual "Range(1 to 10)"
         ScalaPP.format(1 until 10) shouldEqual "Range(1 until 10)"
@@ -107,7 +112,6 @@ class PPSpec extends FunSpec with Matchers {
 
         it("should format without member name if option is set") {
           implicit val format = new DefaultFormat(width = 20, showMemberName = false)
-          println(ScalaPP.format(Cons(Cons(Atom(1), Atom(2)), SNil)))
 
           // 1    6    11   16   21
           ScalaPP.format(Cons(Cons(Atom(1), Atom(2)), SNil)) shouldEqual """

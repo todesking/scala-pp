@@ -48,7 +48,7 @@ class DefaultFormat(val width: Int = 80, val showMemberName: Boolean = false) ex
 
   def buildDoc(value: Any): Doc = {
     import Doc._
-    value match {
+    Group(value match {
       case str:String =>
         Text(s""""${str.replaceAll("\"", "\\\\\"")}"""")
       case c: Char =>
@@ -87,25 +87,38 @@ class DefaultFormat(val width: Int = 80, val showMemberName: Boolean = false) ex
       case s: Traversable[_] =>
         buildDocFromValues(s.stringPrefix, s.map(buildDoc(_)).toIterable)
       case x =>
-        asCaseClass(x).map(buildDocFromCaseClass(_)) getOrElse Text(x.toString)
-    }
+        buildDocGeneric(x)
+    })
   }
 
-  def asCaseClass(value: Any): Option[CaseClass] = {
+  def buildDocGeneric(value: Any): Doc = {
     import scala.reflect.runtime.{universe => ru}
+    import Doc._
 
     val universeMirror = ru.runtimeMirror(value.getClass.getClassLoader)
     val instanceMirror = universeMirror.reflect(value)
 
-    if(!isCaseClass(instanceMirror) || isCaseObject(instanceMirror)) {
-      None
-    } else {
-      Some(CaseClass(instanceMirror))
+    if(isCaseClass(instanceMirror) && !isCaseObject(instanceMirror)) {
+      buildDocFromCaseClass(CaseClass(instanceMirror))
+    } else if(isCaseObject(instanceMirror)) {
+      Text(value.toString)
+    } else value match {
+      case p: Product =>
+        val prefix =
+          if(p.productPrefix startsWith "Tuple") ""
+          else p.productPrefix
+        buildDocFromValues(prefix, p.productIterator.toSeq.map(buildDoc(_)))
+      case other =>
+        Text(other.toString)
     }
   }
 
   def isCaseClass(im: scala.reflect.api.Mirrors#InstanceMirror): Boolean =
-    im.symbol.isCaseClass
+    im.symbol.isCaseClass && (im.instance match {
+      // OH its very ugly
+      case p: Product if !p.productPrefix.startsWith("Tuple") => true
+      case _ => false
+    })
 
   def isCaseObject(im: scala.reflect.api.Mirrors#InstanceMirror): Boolean =
     // It is very... insufficient. But I dont known what to do right.
